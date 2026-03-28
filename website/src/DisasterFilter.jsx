@@ -1,106 +1,61 @@
 import React from 'react';
-import './global.css';
+
+const DISASTER_NAMES = { EQ: 'Earthquake', FL: 'Flood', TC: 'Cyclone', VO: 'Volcano', DR: 'Drought', WF: 'Wildfire' };
+const DISASTER_COLORS = { EQ: '#F59E0B', FL: '#3B82F6', TC: '#8B5CF6', VO: '#EF4444', DR: '#D97706', WF: '#F97316' };
 
 const DisasterFilter = ({ filters, setFilters, disasterCounts }) => {
-  const disasterNames = {
-    EQ: 'Earthquake',
-    FL: 'Flood',
-    TC: 'Cyclone',
-    VO: 'Volcano',
-    DR: 'Drought',
-    WF: 'Wildfire'
-  };
-
-  const handleFilterChange = (type) => {
-    setFilters(prev => ({
-      ...prev,
-      [type]: !prev[type]
-    }));
-  };
-
-  const toggleAllFilters = (value) => {
-    const newFilters = {};
-    Object.keys(filters).forEach(type => {
-      newFilters[type] = value;
-    });
-    setFilters(newFilters);
-  };
+  const toggle = (type) => setFilters(prev => ({ ...prev, [type]: !prev[type] }));
+  const toggleAll = (val) => setFilters(Object.fromEntries(Object.keys(filters).map(k => [k, val])));
 
   return (
-    <div className="disaster-filter" style={{
-      backgroundColor: '#f0f0f0',
-      padding: '0.5rem',
-      borderRadius: '4px',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+    <div style={{
+      background: 'var(--bg-card)',
+      border: '1px solid var(--border-subtle)',
+      borderRadius: '12px',
+      padding: '0.75rem',
+      boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+      backdropFilter: 'blur(8px)',
       marginBottom: '0.5rem',
-      width: '200px'
     }}>
-      <h3 style={{ 
-        margin: '0 0 0.5rem 0',
-        fontSize: '0.9rem',
-        color: '#333'
-      }}>
-        Filter Disasters
+      <h3 style={{ margin: '0 0 0.6rem 0', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+        <i className="fa-solid fa-sliders" style={{ color: 'var(--color-primary)' }}></i> Filter Disasters
       </h3>
-      <div style={{ 
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: '0.3rem',
-        marginBottom: '0.5rem'
-      }}>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.35rem', marginBottom: '0.6rem' }}>
         {Object.entries(filters).map(([type, isActive]) => (
-          <label key={type} style={{ 
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.3rem',
-            fontSize: '0.8rem'
+          <label key={type} onClick={() => toggle(type)} style={{
+            display: 'flex', alignItems: 'center', gap: '0.35rem',
+            fontSize: '0.75rem', cursor: 'pointer', padding: '0.3rem 0.4rem',
+            borderRadius: '6px', border: `1px solid ${isActive ? DISASTER_COLORS[type] + '55' : 'var(--border-subtle)'}`,
+            background: isActive ? DISASTER_COLORS[type] + '12' : 'var(--bg-section)',
+            transition: 'all 0.2s', userSelect: 'none',
           }}>
-            <input
-              type="checkbox"
-              checked={isActive}
-              onChange={() => handleFilterChange(type)}
-              style={{ margin: '0' }}
-            />
-            <span>
-              {disasterNames[type]} 
-              <span style={{ 
-                color: '#666',
-                marginLeft: '0.2rem',
-                fontSize: '0.7rem'
-              }}>
-                ({disasterCounts[type] || 0})
-              </span>
+            <input type="checkbox" checked={isActive} onChange={() => toggle(type)} style={{ accentColor: DISASTER_COLORS[type], margin: 0, cursor: 'pointer' }} />
+            <span style={{ color: isActive ? DISASTER_COLORS[type] : 'var(--text-secondary)', fontWeight: isActive ? 600 : 400, flex: 1 }}>
+              {DISASTER_NAMES[type]}
+            </span>
+            <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', background: 'var(--bg-primary)', padding: '0 4px', borderRadius: '4px', fontWeight: 600 }}>
+              {disasterCounts[type] || 0}
             </span>
           </label>
         ))}
       </div>
-      <div style={{ 
-        display: 'flex',
-        gap: '0.3rem',
-        justifyContent: 'space-between'
-      }}>
-        <button 
-          onClick={() => toggleAllFilters(true)}
-          style={{ 
-            padding: '0.2rem 0.3rem',
-            fontSize: '0.7rem',
-            borderRadius: '3px',
-            border: '1px solid #ccc',
-            background: '#fff'
-          }}
-        >
+
+      <div style={{ display: 'flex', gap: '0.4rem' }}>
+        <button onClick={() => toggleAll(true)} style={{
+          flex: 1, padding: '0.3rem', fontSize: '0.72rem', borderRadius: '7px',
+          border: '1px solid var(--border-active)', background: 'var(--bg-section)',
+          color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s',
+        }}
+          onMouseEnter={e => e.currentTarget.style.background = 'var(--color-primary)' && (e.currentTarget.style.color = '#fff')}
+          onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-section)'; e.currentTarget.style.color = 'var(--text-primary)'; }}>
           Select All
         </button>
-        <button 
-          onClick={() => toggleAllFilters(false)}
-          style={{ 
-            padding: '0.2rem 0.3rem',
-            fontSize: '0.7rem',
-            borderRadius: '3px',
-            border: '1px solid #ccc',
-            background: '#fff'
-          }}
-        >
+        <button onClick={() => toggleAll(false)} style={{
+          flex: 1, padding: '0.3rem', fontSize: '0.72rem', borderRadius: '7px',
+          border: '1px solid var(--border-active)', background: 'var(--bg-section)',
+          color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s',
+        }}>
           Deselect All
         </button>
       </div>

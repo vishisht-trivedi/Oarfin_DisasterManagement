@@ -1,34 +1,48 @@
 import React, { useState } from 'react';
-import './global.css';
 
-const SafeSpotMarker = ({ 
-  safeSpots, 
-  onAddSafeSpot, 
-  onRemoveSafeSpot, 
-  onClearSafeSpots,
-  onSendToBackend,
-  onClickPosition
-}) => {
-  const [formData, setFormData] = useState({
-    lat: '',
-    lng: '',
-    name: '',
-    eventid: ''
-  });
+const inp = {
+  width: '100%',
+  padding: '0.45rem 0.65rem',
+  border: '1px solid var(--border-active)',
+  borderRadius: '8px',
+  fontSize: '0.78rem',
+  background: 'var(--bg-primary)',
+  color: 'var(--text-primary)',
+  outline: 'none',
+  transition: 'border-color 0.2s, box-shadow 0.2s',
+  boxSizing: 'border-box',
+};
+
+const btn = (bg) => ({
+  width: '100%',
+  padding: '0.45rem',
+  fontSize: '0.78rem',
+  background: bg,
+  color: 'white',
+  border: 'none',
+  borderRadius: '8px',
+  cursor: 'pointer',
+  fontWeight: 600,
+  transition: 'opacity 0.2s, transform 0.15s',
+});
+
+const label = {
+  display: 'block',
+  marginBottom: '0.25rem',
+  fontSize: '0.75rem',
+  fontWeight: 600,
+  color: 'var(--text-secondary)',
+};
+
+const SafeSpotMarker = ({ safeSpots, onAddSafeSpot, onRemoveSafeSpot, onClearSafeSpots, onSendToBackend, onClickPosition }) => {
+  const [formData, setFormData] = useState({ lat: '', lng: '', name: '', eventid: '' });
   const [errors, setErrors] = useState({});
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    // Clear error when typing
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
   };
-
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -37,313 +51,115 @@ const SafeSpotMarker = ({
         lat: parseFloat(formData.lat),
         lng: parseFloat(formData.lng),
         name: formData.name || `Safe Spot ${safeSpots.length + 1}`,
-        eventid: formData.eventid || `safespot-${Date.now()}` // Ensure we always have an ID
+        eventid: formData.eventid || `safespot-${Date.now()}`,
       });
       setFormData({ lat: '', lng: '', name: '', eventid: '' });
     }
   };
 
   const handleSendToBackend = () => {
-    const data = {
+    onSendToBackend({
       safeSpots: safeSpots.map(spot => ({
         latitude: spot.position.lat,
         longitude: spot.position.lng,
         name: spot.name,
-        eventId: spot.eventid
-      }))
-    };
-    onSendToBackend(data);
+        eventId: spot.eventid,
+      })),
+    });
   };
 
   return (
-    <div className="safe-spot-controls" style={{
-      backgroundColor: 'white',
-      padding: '0.5rem',
-      borderRadius: '4px',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+    <div style={{
+      background: 'var(--bg-card)',
+      border: '1px solid var(--border-subtle)',
+      borderRadius: '12px',
+      padding: '0.85rem',
+      boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+      backdropFilter: 'blur(8px)',
       flex: 1,
-      fontSize: '0.8rem'
+      fontSize: '0.8rem',
     }}>
-      <h3 style={{ 
-        margin: '0 0 0.5rem 0',
-        fontSize: '0.9rem',
-        color: '#2c3e50'
-      }}>
-        Safe Spots Manager
+      <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+        <i className="fa-solid fa-map-pin" style={{ color: 'var(--color-safe)' }}></i> Safe Spots Manager
       </h3>
-      
+
       {onClickPosition && (
-        <div style={{ 
-          marginBottom: '0.5rem',
-          padding: '0.4rem',
-          backgroundColor: '#f8f9fa',
-          borderRadius: '3px',
-          border: '1px solid #e9ecef',
-          fontSize: '0.75rem'
-        }}>
-          <p style={{ margin: '0 0 0.2rem 0' }}>
-            <strong>Clicked Position:</strong> 
-            <br />Lat: {onClickPosition.lat.toFixed(6)}
-            <br />Lng: {onClickPosition.lng.toFixed(6)}
+        <div style={{ marginBottom: '0.65rem', padding: '0.5rem 0.65rem', background: 'var(--bg-section)', borderRadius: '8px', border: '1px solid var(--border-subtle)', fontSize: '0.73rem' }}>
+          <p style={{ margin: '0 0 0.3rem 0', color: 'var(--text-secondary)' }}>
+            <strong style={{ color: 'var(--text-primary)' }}>Clicked:</strong><br />
+            Lat: {onClickPosition.lat.toFixed(6)}<br />
+            Lng: {onClickPosition.lng.toFixed(6)}
           </p>
-          <button
-            onClick={() => {
-              setFormData(prev => ({
-                ...prev,
-                lat: onClickPosition.lat.toFixed(6),
-                lng: onClickPosition.lng.toFixed(6)
-              }));
-            }}
-            style={{
-              padding: '0.2rem 0.4rem',
-              fontSize: '0.7rem',
-              backgroundColor: '#3498db',
-              color: 'white',
-              border: 'none',
-              borderRadius: '2px',
-              cursor: 'pointer',
-              marginTop: '0.2rem'
-            }}
-          >
+          <button onClick={() => setFormData(prev => ({ ...prev, lat: onClickPosition.lat.toFixed(6), lng: onClickPosition.lng.toFixed(6) }))}
+            style={{ ...btn('#2563EB'), width: 'auto', padding: '0.2rem 0.6rem', fontSize: '0.7rem', borderRadius: '6px' }}>
             Use This Position
           </button>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} style={{ marginBottom: '0.5rem' }}>
-        <div style={{ marginBottom: '0.4rem' }}>
-          <label style={{ 
-            display: 'block', 
-            marginBottom: '0.2rem',
-            color: '#495057'
-          }}>
-            Latitude:
-          </label>
-          <input
-            type="number"
-            name="lat"
-            value={formData.lat}
-            onChange={handleInputChange}
-            step="any"
-            required
-            style={{
-              width: '100%',
-              padding: '0.3rem',
-              border: `1px solid ${errors.lat ? '#e74c3c' : '#ced4da'}`,
-              borderRadius: '2px',
-              fontSize: '0.75rem'
-            }}
-          />
-          {errors.lat && <span style={{ color: '#e74c3c', fontSize: '0.7rem' }}>{errors.lat}</span>}
-        </div>
-        
-        <div style={{ marginBottom: '0.4rem' }}>
-          <label style={{ 
-            display: 'block', 
-            marginBottom: '0.2rem',
-            color: '#495057'
-          }}>
-            Longitude:
-          </label>
-          <input
-            type="number"
-            name="lng"
-            value={formData.lng}
-            onChange={handleInputChange}
-            step="any"
-            required
-            style={{
-              width: '100%',
-              padding: '0.3rem',
-              border: `1px solid ${errors.lng ? '#e74c3c' : '#ced4da'}`,
-              borderRadius: '2px',
-              fontSize: '0.75rem'
-            }}
-          />
-          {errors.lng && <span style={{ color: '#e74c3c', fontSize: '0.7rem' }}>{errors.lng}</span>}
-        </div>
-        
-        <div style={{ marginBottom: '0.4rem' }}>
-          <label style={{ 
-            display: 'block', 
-            marginBottom: '0.2rem',
-            color: '#495057'
-          }}>
-            Event ID (required):
-          </label>
-          <input
-            type="text"
-            name="eventid"
-            value={formData.eventid}
-            onChange={handleInputChange}
-            required
-            style={{
-              width: '100%',
-              padding: '0.3rem',
-              border: `1px solid ${errors.eventId ? '#e74c3c' : '#ced4da'}`,
-              borderRadius: '2px',
-              fontSize: '0.75rem'
-            }}
-            placeholder="Add event id of disaster whoes safe spot is marked"
+      <form onSubmit={handleSubmit} style={{ marginBottom: '0.6rem' }}>
+        {[
+          { key: 'lat', label: 'Latitude:', type: 'number' },
+          { key: 'lng', label: 'Longitude:', type: 'number' },
+          { key: 'eventid', label: 'Event ID (required):', type: 'text', placeholder: 'Add event id of disaster whose safe spot is marked' },
+          { key: 'name', label: 'Name (optional):', type: 'text' },
+        ].map(({ key, label: lbl, type, placeholder }) => (
+          <div key={key} style={{ marginBottom: '0.5rem' }}>
+            <label style={label}>{lbl}</label>
+            <input
+              type={type}
+              name={key}
+              value={formData[key]}
+              onChange={handleInputChange}
+              placeholder={placeholder || ''}
+              step={type === 'number' ? 'any' : undefined}
+              required={key === 'lat' || key === 'lng'}
+              style={{ ...inp, borderColor: errors[key] ? 'var(--color-critical)' : undefined }}
+              onFocus={e => { e.target.style.borderColor = 'var(--color-primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(37,99,235,0.12)'; }}
+              onBlur={e => { e.target.style.borderColor = errors[key] ? 'var(--color-critical)' : 'var(--border-active)'; e.target.style.boxShadow = 'none'; }}
             />
-        </div>
-        
-        <div style={{ marginBottom: '0.4rem' }}>
-          <label style={{ 
-            display: 'block', 
-            marginBottom: '0.2rem',
-            color: '#495057'
-          }}>
-            Name (optional):
-          </label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            style={{
-              width: '100%',
-              padding: '0.3rem',
-              border: '1px solid #ced4da',
-              borderRadius: '2px',
-              fontSize: '0.75rem'
-            }}
-          />
-        </div>
-        
-        <button
-          type="submit"
-          style={{
-            width: '100%',
-            padding: '0.3rem',
-            fontSize: '0.75rem',
-            backgroundColor: '#27ae60',
-            color: 'white',
-            border: 'none',
-            borderRadius: '2px',
-            cursor: 'pointer',
-            marginBottom: '0.4rem'
-          }}
-        >
-          Add Safe Spot
+            {errors[key] && <span style={{ color: 'var(--color-critical)', fontSize: '0.7rem' }}>{errors[key]}</span>}
+          </div>
+        ))}
+        <button type="submit" style={{ ...btn('var(--color-safe)'), marginTop: '0.25rem' }}>
+          <i className="fa-solid fa-plus" style={{ marginRight: '0.3rem' }}></i>Add Safe Spot
         </button>
       </form>
 
-      <div style={{ display: 'flex', gap: '0.3rem', marginBottom: '0.5rem' }}>
-        <button
-          onClick={() => setFormData({
-            lat: '20',
-            lng: '0',
-            name: `Sample Spot ${safeSpots.length + 1}`,
-            eventId: `sample-${Date.now().toString().slice(-4)}`
-          })}
-          style={{
-            padding: '0.3rem',
-            fontSize: '0.75rem',
-            backgroundColor: '#3498db',
-            color: 'white',
-            border: 'none',
-            borderRadius: '2px',
-            cursor: 'pointer',
-            flex: 1
-          }}
-        >
-          Sample
-        </button>
-        
-        <button
-          onClick={onClearSafeSpots}
-          style={{
-            padding: '0.3rem',
-            fontSize: '0.75rem',
-            backgroundColor: '#e74c3c',
-            color: 'white',
-            border: 'none',
-            borderRadius: '2px',
-            cursor: 'pointer',
-            flex: 1
-          }}
-        >
-          Clear All
-        </button>
+      <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.5rem' }}>
+        <button onClick={() => setFormData({ lat: '20', lng: '0', name: `Sample Spot ${safeSpots.length + 1}`, eventid: `sample-${Date.now().toString().slice(-4)}` })}
+          style={{ ...btn('#2563EB'), flex: 1 }}>Sample</button>
+        <button onClick={onClearSafeSpots} style={{ ...btn('var(--color-critical)'), flex: 1 }}>Clear All</button>
       </div>
 
-      <button
-        onClick={handleSendToBackend}
-        style={{
-          width: '100%',
-          padding: '0.3rem',
-          fontSize: '0.75rem',
-          backgroundColor: '#9b59b6',
-          color: 'white',
-          border: 'none',
-          borderRadius: '2px',
-          cursor: 'pointer',
-          marginBottom: '0.5rem'
-        }}
-      >
-        Send to Backend
+      <button onClick={handleSendToBackend} style={btn('#7C3AED')}>
+        <i className="fa-solid fa-paper-plane" style={{ marginRight: '0.3rem' }}></i>Send to Backend
       </button>
 
       {safeSpots.length > 0 && (
-    <div style={{ 
-      marginTop: '0.75rem',
-      maxHeight: '120px',
-      overflowY: 'auto',
-      borderTop: '1px solid #ecf0f1',
-      paddingTop: '0.5rem'
-    }}>
-      <h4 style={{ 
-        fontSize: '0.85rem',
-        margin: '0 0 0.5rem 0',
-        color: '#7f8c8d'
-      }}>
-        Saved Spots ({safeSpots.length}):
-      </h4>
-      <ul style={{
-        listStyle: 'none',
-        padding: 0,
-        margin: 0,
-        fontSize: '0.8rem'
-      }}>
-        {safeSpots.map(spot => (
-          <li 
-            key={spot.id}
-            style={{
-              padding: '0.25rem 0',
-              borderBottom: '1px solid #ecf0f1',
-              display: 'flex',
-              justifyContent: 'space-between'
-            }}
-          >
-            <div>
-              <div>{spot.name}</div>
-              <div style={{ fontSize: '0.7rem', color: '#666' }}>
-                {spot.position.lat.toFixed(4)}, {spot.position.lng.toFixed(4)}
-                <br />
-                ID: {spot.eventid}  {/* Display the eventid here */}
-              </div>
-            </div>
-            <button
-              onClick={() => onRemoveSafeSpot(spot.id)}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#e74c3c',
-                cursor: 'pointer',
-                fontSize: '0.75rem'
-              }}
-            >
-              Remove
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )}
-
+        <div style={{ marginTop: '0.75rem', maxHeight: '120px', overflowY: 'auto', borderTop: '1px solid var(--border-subtle)', paddingTop: '0.5rem' }}>
+          <h4 style={{ fontSize: '0.78rem', margin: '0 0 0.4rem 0', color: 'var(--text-secondary)', fontWeight: 600 }}>
+            Saved Spots ({safeSpots.length}):
+          </h4>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            {safeSpots.map(spot => (
+              <li key={spot.id} style={{ padding: '0.3rem 0', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-primary)' }}>{spot.name}</div>
+                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                    {spot.position.lat.toFixed(4)}, {spot.position.lng.toFixed(4)}<br />ID: {spot.eventid}
+                  </div>
+                </div>
+                <button onClick={() => onRemoveSafeSpot(spot.id)} style={{ background: 'none', border: 'none', color: 'var(--color-critical)', cursor: 'pointer', fontSize: '0.75rem', padding: '0.1rem 0.3rem' }}>
+                  <i className="fa-solid fa-xmark"></i>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };
 
-export default SafeSpotMarker;          
+export default SafeSpotMarker;
